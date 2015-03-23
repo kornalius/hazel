@@ -1,16 +1,20 @@
+'use strict'
+
 { create, diff, patch, VNode, VText } = require('virtual-dom')
 { virtualize } = require('vdom-virtualize')
 toHTML = require('vdom-to-html')
-isVNode = require('virtual-dom/vnode/is-vnode');
-isVText = require('virtual-dom/vnode/is-vtext');
-isThunk = require('virtual-dom/vnode/is-thunk');
+isVNode = require('virtual-dom/vnode/is-vnode')
+isVText = require('virtual-dom/vnode/is-vtext')
+isThunk = require('virtual-dom/vnode/is-thunk')
 Delegator = require("dom-delegator")
 EventEmitter = require("events").EventEmitter
 $v = require('vdom-query')
+$ = require('bonzo')
+_is = require('is')
 
 module.exports =
 
-  Component: class Component
+  HazelComponent: class Component
     @vdom = null
     @el = null
     @data = {}

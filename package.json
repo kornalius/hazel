@@ -2,7 +2,7 @@
   "name": "hazel",
   "version": "0.0.1",
   "description": "Hazel is a Coffeescript library for creating component-based user interfaces for the web.",
-  "main": "index.js",
+  "main": "./dist/hazel.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -25,5 +25,39 @@
   "bugs": {
     "url": "https://github.com/kornalius/hazel/issues"
   },
-  "homepage": "https://github.com/kornalius/hazel"
+  "homepage": "https://github.com/kornalius/hazel",
+  "dependencies": {
+    "bonzo": "^2.0.0",
+    "ccss": "^0.1.2-1",
+    "dom-delegator": "^13.1.0",
+    "is": "^3.0.1",
+    "observe-js": "^0.4.2",
+    "property-accessors": "^1.1.3",
+    "q": "^1.2.0",
+    "raf": "^2.0.4",
+    "teacup": "^1.2.0",
+    "underscore-plus": "^1.6.6",
+    "underscore.string": "^3.0.3",
+    "vdom-query": "0.0.1",
+    "vdom-to-html": "^1.3.1",
+    "vdom-virtualize": "0.0.6",
+    "virtual-dom": "^2.0.1",
+    "when": "^3.7.2"
+  },
+  "devDependencies": {
+    "coffee-script": "^1.9.1",
+    "del": "^1.1.1",
+    "gulp": "^3.8.11",
+    "gulp-coffee": "^2.3.1",
+    "gulp-concat": "^2.5.2",
+    "gulp-copy": "0.0.2",
+    "gulp-if": "^1.2.5",
+    "gulp-load-plugins": "^0.9.0",
+    "gulp-notify": "^2.2.0",
+    "gulp-plumber": "^1.0.0",
+    "gulp-rename": "^1.2.0",
+    "gulp-sequence": "^0.3.2",
+    "gulp-sourcemaps": "^1.5.1",
+    "gulp-uglify": "^1.1.0"
+  }
 }
