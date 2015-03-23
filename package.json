@@ -1,0 +1,29 @@
+{
+  "name": "hazel",
+  "version": "0.0.1",
+  "description": "Hazel is a Coffeescript library for creating component-based user interfaces for the web.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kornalius/hazel.git"
+  },
+  "keywords": [
+    "coffeescript",
+    "component",
+    "interface",
+    "gui",
+    "ui",
+    "library",
+    "view",
+    "virtual-dom"
+  ],
+  "author": "Alain Deschenes <arianesoftinc@gmail.com> (c)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kornalius/hazel/issues"
+  },
+  "homepage": "https://github.com/kornalius/hazel"
+}
