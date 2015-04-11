@@ -10,20 +10,20 @@ var del         = require('del');
 
 var out         = 'dist/';
 
-var _out = '!' + out + '**/*';
-var _bower = '!bower_components/**/*';
-var _node = '!node_modules/**/*';
+// var _out = '!' + out + '**/*';
+// var _bower = '!bower_components/**/*';
+// var _node = '!node_modules/**/*';
 
 gulp.task('clean', function (cb) {
   del([out], cb);
 });
 
 gulp.task('scripts', function () {
-  return gulp.src(['**/*.coffee', _out, _bower, _node])
+  return gulp.src('hazel.coffee', { read: false })
     .pipe(run.plumber({errorHandler: run.notify.onError('Error: <%= error.message %>')}))
     .pipe(run.if(config.production, run.sourcemaps.init()))
-    .pipe(run.coffee({ bare: true }))
-    .pipe(run.concat(config.production ? 'hazel.min.js' : 'hazel.js'))
+    .pipe(run.browserify({ standalone: 'hazel', debug: !config.production, transform: ['coffeeify'], extensions: ['.coffee'] }))
+    .pipe(run.rename(config.production ? 'hazel.min.js' : 'hazel.js'))
     .pipe(run.if(config.production, run.uglify({ mangle: true })))
     .pipe(run.if(config.production, run.sourcemaps.write()))
     .pipe(gulp.dest(out));
