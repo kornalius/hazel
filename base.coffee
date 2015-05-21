@@ -1,4 +1,4 @@
-{ $, toRedraw, hazeling, ccss, css, vdom, renderable, div } = require('./hazel.coffee')
+{ $, toRedraw, redrawing, hazeling, ccss, css, vdom, renderable, div } = require('./hazel.coffee')
 { fromHTML, create, diff, patch } = vdom
 { relative } = css
 
@@ -292,19 +292,19 @@ BaseView = Class 'BaseView',
 
 
   attributeChangedCallback: (name, oldValue, newValue) ->
-    console.log "attributeChanged:", name, oldValue, '->', newValue
-    @refresh()
-
+    console.log "attributeChanged:", "#{@tagName.toLowerCase()}#{if !_.isEmpty(@id) then '#' + @id else ''}#{if !_.isEmpty(@className) then '.' + @className else ''}", name, oldValue, '->', newValue
+    if @isAttached
+      @refresh()
 
   _dom: ->
-    if !hazeling()
-      s = _getTemplate(@, @__proto__)
-      if _.isEmpty(s)
-        s = '<div></div>'
-      st = '<style>' + ccss.compile(_getStyle(@, @__proto__)) + '</style>'
-    else
-      s = "<div test></div>"
-      st = '<style></style>'
+    return if hazeling()
+
+    s = _getTemplate(@, @__proto__)
+    if _.isEmpty(s)
+      s = '<div></div>'
+    # if !s.startsWith('<div>')
+    #   s = '<div>' + s + '</div>'
+    st = '<style>' + ccss.compile(_getStyle(@, @__proto__)) + '</style>'
 
     vs = fromHTML(st)
     if vs?
@@ -317,10 +317,6 @@ BaseView = Class 'BaseView',
 
     v = fromHTML(s)
     if v?
-
-      # if @tagName == 'DESKTOP-VIEW'
-      #   debugger;
-
       # _setVProperties(v)
 
       if !@_vdom?

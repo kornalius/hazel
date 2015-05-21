@@ -1,9 +1,21 @@
 'use strict'
 
+Guid = require('guid')
+
 # Kaffa = require('../kaffa/dist/kaffa.js')
 Kaffa = require('../kaffa/kaffa.coffee')
 
 { create, diff, patch, VNode, VText } = require('virtual-dom')
+
+# convertHTML = require('html-to-vdom')(VNode: VNode, VText: VText)
+# fromHTML = convertHTML.bind(null,
+#     getVNodeKey: (attributes) ->
+#       if attributes?.id?
+#         attributes.id
+#       # else
+#       #   Guid.raw()
+# )
+
 fromHTML = require('html-to-vdom')(VNode: VNode, VText: VText)
 toHTML = require('vdom-to-html')
 isVNode = require('virtual-dom/vnode/is-vnode')
@@ -30,9 +42,10 @@ raf _redrawAll = ->
 
   _redrawing = true
   if _toRedraw.length
-    for r in _toRedraw
-      r.redraw()
+    t = _.clone(_toRedraw)
     _toRedraw.length = 0
+    for r in t
+      r.redraw()
   _redrawing = false
 
   raf(_redrawAll)
@@ -45,6 +58,9 @@ raf _redrawAll = ->
 
 $.fn.on = (eventType, selector, handler, args...) ->
   @each((el) -> bean.on(el, eventType, selector, handler, args...))
+
+$.fn.add = (eventType, selector, handler, args...) ->
+  @each((el) -> bean.add(el, eventType, selector, handler, args...))
 
 $.fn.one = (eventType, selector, handler, args...) ->
   @each((el) -> bean.one(el, eventType, selector, handler, args...))
@@ -182,12 +198,19 @@ module.exports =
       _hazeling = false
 
     # teacup tag
-    f = -> teacup.tag name, arguments...
+    # f = ->
+      # { selector, attrs, contents } = teacup.normalizeArgs arguments
+      # console.log name, selector, attrs, contents
+      # teacup.tag name, selector, attrs, contents
+
+    f = ->
+      teacup.tag name, arguments...
 
     window[name.replace('-', '_')] = f
     window[_.camelize(name)] = f
 
     return klass
+
 
   shutHazel: ->
 
