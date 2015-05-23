@@ -269,10 +269,12 @@ BaseView = Class 'BaseView',
     for k in @_properties
       @_observeProperty(k)
 
+    @redraw()
+
     if @attached?
       @attached()
 
-    @refresh()
+    # @refresh()
 
     @isAttached = true
 
@@ -292,7 +294,7 @@ BaseView = Class 'BaseView',
 
 
   attributeChangedCallback: (name, oldValue, newValue) ->
-    console.log "attributeChanged:", "#{@tagName.toLowerCase()}#{if !_.isEmpty(@id) then '#' + @id else ''}#{if !_.isEmpty(@className) then '.' + @className else ''}", name, oldValue, '->', newValue
+    # console.log "attributeChanged:", "#{@tagName.toLowerCase()}#{if !_.isEmpty(@id) then '#' + @id else ''}#{if !_.isEmpty(@className) then '.' + @className else ''}", name, oldValue, '->', newValue
     if @isAttached
       @refresh()
 
@@ -330,8 +332,38 @@ BaseView = Class 'BaseView',
       @updated()
 
 
+  attr: (name, value) ->
+    if !value?
+      @getAttribute name
+    else
+      @setAttribute name, value
+
+
+  addClass: (name) ->
+    if !@hasClass(name)
+      @classList.add(name)
+
+
+  hasClass: (name) ->
+    _.contains(@classList, name)
+
+
+  removeClass: (name) ->
+    if @hasClass(name)
+      @classList.remove(name)
+
+
+  toggleClass: (name) ->
+    if @hasClass(name)
+      @removeClass(name)
+    else
+      @addClass(name)
+
+
   redraw: ->
     @_dom()
+    if _.contains(toRedraw, @)
+      _.remove(toRedraw, @)
     # console.log "redraw", @
 
 
