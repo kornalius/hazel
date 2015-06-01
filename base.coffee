@@ -43,12 +43,12 @@ _getTemplate = (view, proto) ->
   ps = proto._superclass
   t = if proto.layout?.template? then proto.layout.template else null
   if ps?.layout?.template?
-    ps.layout.template.call(view, view, t)
+    ps.layout.template.call(view, t)
   else if t?
-    t.call(view, view)
+    t.call(view)
   else
-    renderable (el) ->
-      span ""
+    renderable -> span ""
+
 
 # string to type
 _deserializeAttributeValue = (value) ->
@@ -106,8 +106,8 @@ BaseView = Class 'BaseView',
         display: 'inline-block'
         cursor: 'default'
 
-    template: renderable (el, content) ->
-      content(el) if content?
+    template: renderable (content) ->
+      content.call(@) if content?
 
 
   createdCallback: ->
@@ -125,6 +125,11 @@ BaseView = Class 'BaseView',
     @_vdom = null
     @_vdom_style = null
     @_observers = []
+
+    @$ = $(@)
+    @[0] = @
+    @length = 1
+    @cash = true
 
     if @created?
       @created()
@@ -332,34 +337,6 @@ BaseView = Class 'BaseView',
       @updated()
 
 
-  attr: (name, value) ->
-    if !value?
-      @getAttribute name
-    else
-      @setAttribute name, value
-
-
-  addClass: (name) ->
-    if !@hasClass(name)
-      @classList.add(name)
-
-
-  hasClass: (name) ->
-    _.contains(@classList, name)
-
-
-  removeClass: (name) ->
-    if @hasClass(name)
-      @classList.remove(name)
-
-
-  toggleClass: (name) ->
-    if @hasClass(name)
-      @removeClass(name)
-    else
-      @addClass(name)
-
-
   redraw: ->
     @_dom()
     if _.contains(toRedraw, @)
@@ -390,6 +367,11 @@ BaseView = Class 'BaseView',
 
 
   updated: ->
+
+
+for k of $.fn
+  if !(k in ['length', 'cash', 'init', 'extend']) and !BaseView.prototype[k]?
+    BaseView.prototype[k] = ( (fn) -> (args...) -> fn.call(@$, args...))($.fn[k])
 
 
 module.exports.BaseView = BaseView

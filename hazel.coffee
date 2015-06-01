@@ -29,6 +29,7 @@ teacup = require('teacup')
 { PathObserver, ArrayObserver, ObjectObserver, hasObjectObserve, CompoundObserver, Path, ObserverTransform } = require('observe-js')
 $ = require('cash-dom')
 { Class } = Kaffa
+color = require('color')
 
 _ = require('underscore-plus')
 _.is = require('is')
@@ -51,45 +52,20 @@ raf _redrawAll = ->
   raf(_redrawAll)
 
 
-# $.fn.on = bean.on.bind(bean)
-# $.fn.one = bean.one.bind(bean)
-# $.fn.off = bean.off.bind(bean)
-# $.fn.fire = bean.fire.bind(bean)
-
-$.fn.on = (eventType, selector, handler, args...) ->
-  @each((el) -> bean.on(el, eventType, selector, handler, args...))
-
-$.fn.add = (eventType, selector, handler, args...) ->
-  @each((el) -> bean.add(el, eventType, selector, handler, args...))
-
-$.fn.one = (eventType, selector, handler, args...) ->
-  @each((el) -> bean.one(el, eventType, selector, handler, args...))
-
-$.fn.off = (eventType, handler) ->
-  @each((el) -> bean.off(el, eventType, handler))
-
-$.fn.fire = (eventType, args...) ->
-  @each((el) -> bean.fire(el, eventType, args...))
-
-$.fn.eachDeep = (f) ->
-  @each((el) ->
-    f(el)
-    if el.shadowRoot?
-      $(el.shadowRoot).eachDeep(f)
-    cn = el.childNodes
-    for i in [0...cn.length]
-      $(cn[i]).eachDeep(f) if cn[i].nodeType != 3
-  )
+require('./domcash-ex.coffee')
 
 
 _classify = (name) ->
   _.capitalize(_.camelize(name))
 
+
 _isElementRegistered = (name) ->
   _elementConstructor(name) != HTMLElement
 
+
 _elementConstructor = (name) ->
   document.createElement(name).constructor
+
 
 _createElement = (name, attributes) ->
   el = document.createElement(name)
@@ -97,10 +73,12 @@ _createElement = (name, attributes) ->
     el.setAttribute(key, value.toString())
   return el
 
+
 _appendElement = (name, selector, attributes) ->
   el = _createElement(name, attributes)
   $(selector)[0].appendChild(el)
   return el
+
 
 _loadCSS = (path, macros) ->
   fs = require('fs')
@@ -120,6 +98,7 @@ module.exports =
   raf: raf
   ccss: ccss
   teacup: teacup
+  color: color
 
   toRedraw: _toRedraw
   redrawing: -> _redrawing
