@@ -33,8 +33,10 @@ color = require('color')
 
 _ = require('underscore-plus')
 _.is = require('is')
+_.extend(_, require('underscore-contrib'))
 
 
+_contents = []
 _toRedraw = []
 _redrawing = false
 _hazeling = false
@@ -52,7 +54,7 @@ raf _redrawAll = ->
   raf(_redrawAll)
 
 
-require('./domcash-ex.coffee')
+require('./cashdom-ex.coffee')
 
 
 _classify = (name) ->
@@ -103,6 +105,7 @@ module.exports =
   toRedraw: _toRedraw
   redrawing: -> _redrawing
   hazeling: -> _hazeling
+  contents: _contents
 
   vdom:
     $: $v
@@ -166,7 +169,6 @@ module.exports =
 
     important: -> Array.prototype.slice.call(arguments).join(' ') + ' !important'
 
-
   hazel: (name, klass) ->
     klass = BaseView if !klass?
     proto = klass.prototype
@@ -177,13 +179,29 @@ module.exports =
       _hazeling = false
 
     # teacup tag
-    # f = ->
-      # { selector, attrs, contents } = teacup.normalizeArgs arguments
-      # console.log name, selector, attrs, contents
-      # teacup.tag name, selector, attrs, contents
 
-    f = ->
-      teacup.tag name, arguments...
+    # f = teacup.component (selector, attrs, renderContents, args...) ->
+    #       @raw "<#{name}#{@renderAttrs attrs}>"
+    #       renderContents.apply(@, args)
+    #       @raw "</#{name}>"
+
+    f = teacup.renderable (args...) ->
+          { selector, attrs, contents } = teacup.normalizeArgs args
+          if !_.isFunction(contents)
+            teacup.tag name, selector, attrs, contents
+          else
+            i = _contents.indexOf(contents)
+            if i == -1
+              i = _contents.length
+              _contents.push contents
+            teacup.tag name, selector, attrs, "#{i}"
+
+    # f = (tagName, args...) ->
+    #   debugger;
+    #   {attrs, contents} = teacup.normalizeArgs args
+    #   @raw "<#{tagName}#{@renderAttrs attrs}>"
+    #   @renderContents contents
+    #   @raw "</#{tagName}>"
 
     window[name.replace('-', '_')] = f
     window[_.camelize(name)] = f
@@ -192,6 +210,15 @@ module.exports =
 
 
   shutHazel: ->
+
+
+if !teacup.oldRenderAttr?
+  teacup.oldRenderAttr = teacup.renderAttr
+  teacup.renderAttr = (name, value) ->
+    if name == 'content' and _.isFunction(value)
+      @_content = value
+    else
+      teacup.oldRenderAttr name, value
 
 
 for k, v of teacup

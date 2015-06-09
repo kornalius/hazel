@@ -1,4 +1,4 @@
-{ $, toRedraw, redrawing, hazeling, ccss, css, vdom, renderable, div } = require('./hazel.coffee')
+{ $, toRedraw, redrawing, hazeling, ccss, css, vdom, contents, renderable, div } = require('./hazel.coffee')
 { fromHTML, create, diff, patch } = vdom
 { relative } = css
 
@@ -39,15 +39,16 @@ _getStyle = (view, proto) ->
   _.deepExtend({}, sv, v)
 
 
-_getTemplate = (view, proto) ->
-  ps = proto._superclass
+_getTemplate = (view, proto, args...) ->
+  # ps = proto._superclass
   t = if proto.layout?.template? then proto.layout.template else null
-  if ps?.layout?.template?
-    ps.layout.template.call(view, t)
-  else if t?
-    t.call(view)
+  # if ps?.layout?.template?
+    # ps.layout.template.call(view, t, args...)
+  # else if t?
+  if t?
+    t.call(view, args...)
   else
-    renderable -> span ""
+    (renderable -> span "").call(view, args...)
 
 
 # string to type
@@ -106,14 +107,11 @@ BaseView = Class 'BaseView',
         display: 'inline-block'
         cursor: 'default'
 
-    template: renderable (content) ->
-      content.call(@) if content?
-
 
   createdCallback: ->
     @_properties = []
     for k, v of @
-      if k != '$$' and k.startsWith('$') and !_.isFunction(v)
+      if k.startsWith('$') and !_.isFunction(v)
         nk = k.substr(1)
         @[nk] = @[k]
         @_properties.push(nk)
@@ -140,7 +138,7 @@ BaseView = Class 'BaseView',
   _bindInputs: ->
     that = @
 
-    $(@).find(':root /deep/ input').each((el) ->
+    @$.find(':root /deep/ input').each((el) ->
       el = $(el)
       path = el.prop('bind')
       if path? and _.valueForKeyPath(that, path)?
@@ -169,7 +167,7 @@ BaseView = Class 'BaseView',
 
 
   _removeEvents: ->
-    $(@).eachDeep((el) ->
+    @$.eachDeep((el) ->
       $(el).off()
     )
 
@@ -183,11 +181,11 @@ BaseView = Class 'BaseView',
         if p.length > 1
           eventType = _.first(p)
           selector = _.rest(p).join(' ')
-          els = $(@).find(':root /deep/ ' + selector.trim())
+          els = @$.find(':root /deep/ ' + selector.trim())
         else
           eventType = k.trim()
           selector = null
-          els = $(@)
+          els = @$
 
         if v?
           els.on(eventType, v)
@@ -203,10 +201,9 @@ BaseView = Class 'BaseView',
 
   _createIds: ->
     that = @
-    @.$$ = {}
-    $(@).eachDeep((el) ->
+    @$.eachDeep((el) ->
       if !_.isEmpty(el.id)
-        that.$$[_.camelize(el.id)] = el
+        that['_' + _.camelize(el.id)] = el
     )
 
 
@@ -234,14 +231,14 @@ BaseView = Class 'BaseView',
       value = @attributes[i].value
       if key.startsWith('on-')
         if !value?
-          $(@).off(key.substr(3))
+          @$.off(key.substr(3))
         else if _.isFunction(value)
-          $(@).on(key.substr(3), value)
+          @$.on(key.substr(3), value)
         else if _.isString(value)
           if @[value]? and _.isFunction(@[value])
-            $(@).on(key.substr(3), @[value])
+            @$.on(key.substr(3), @[value])
           else
-            $(@).on(key.substr(3), new Function(['event'], value))
+            @$.on(key.substr(3), new Function(['event'], value))
 
 
   _prepare: ->
@@ -303,16 +300,20 @@ BaseView = Class 'BaseView',
     if @isAttached
       @refresh()
 
+
   _dom: ->
     return if hazeling()
 
-    s = _getTemplate(@, @__proto__)
-    if _.isEmpty(s)
-      s = '<div></div>'
-    # if !s.startsWith('<div>')
-    #   s = '<div>' + s + '</div>'
-    st = '<style>' + ccss.compile(_getStyle(@, @__proto__)) + '</style>'
+    try
+      i = parseInt(@textContent)
+    catch
+      i = NaN
+    if !_.isNaN(i)
+      content = contents[i]
+    else
+      content = null
 
+    st = '<style>' + ccss.compile(_getStyle(@, @__proto__)) + '</style>'
     vs = fromHTML(st)
     if vs?
       if !@_vdom_style?
@@ -322,6 +323,9 @@ BaseView = Class 'BaseView',
         @_el_style = patch(@_el_style, patches);
     @_vdom_style = vs;
 
+    s = _getTemplate(@, @__proto__, content)
+    if _.isEmpty(s)
+      s = '<div></div>'
     v = fromHTML(s)
     if v?
       # _setVProperties(v)
