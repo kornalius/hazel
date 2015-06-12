@@ -87,11 +87,12 @@ _setVProperties = (v) ->
   if v.children?
     _setVProperties(c) for c in v.children
   if v.properties?
+    if !v.properties.attributes?
+      v.properties.attributes = {}
     for key, value of v.properties
       if !(key in ['dataset', 'id', 'class'])
-        if !v.properties.attributes?
-          v.properties.attributes = {}
         v.properties.attributes[key] = value
+        delete v.properties[key]
 
 
 BaseView = Class 'BaseView',
@@ -203,7 +204,7 @@ BaseView = Class 'BaseView',
     that = @
     @$.eachDeep((el) ->
       if !_.isEmpty(el.id)
-        that['_' + _.camelize(el.id)] = el
+        that[_.camelize(el.id) + '$'] = el
     )
 
 
@@ -315,26 +316,23 @@ BaseView = Class 'BaseView',
 
     st = '<style>' + ccss.compile(_getStyle(@, @__proto__)) + '</style>'
     vs = fromHTML(st)
-    if vs?
-      if !@_vdom_style?
-        @_el_style = create(vs)
-      else
-        patches = diff(@_vdom_style, vs);
-        @_el_style = patch(@_el_style, patches);
+    if !@_vdom_style?
+      @_el_style = create(vs)
+    else
+      patches = diff(@_vdom_style, vs);
+      @_el_style = patch(@_el_style, patches);
     @_vdom_style = vs;
 
     s = _getTemplate(@, @__proto__, content)
+    console.log s
     if _.isEmpty(s)
       s = '<div></div>'
     v = fromHTML(s)
-    if v?
-      # _setVProperties(v)
-
-      if !@_vdom?
-        @_el = create(v)
-      else
-        patches = diff(@_vdom, v);
-        @_el = patch(@_el, patches);
+    if !@_vdom?
+      @_el = create(v)
+    else
+      patches = diff(@_vdom, v);
+      @_el = patch(@_el, patches);
     @_vdom = v;
 
     if @updated?

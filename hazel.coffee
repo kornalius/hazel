@@ -180,11 +180,6 @@ module.exports =
 
     # teacup tag
 
-    # f = teacup.component (selector, attrs, renderContents, args...) ->
-    #       @raw "<#{name}#{@renderAttrs attrs}>"
-    #       renderContents.apply(@, args)
-    #       @raw "</#{name}>"
-
     f = teacup.renderable (args...) ->
           { selector, attrs, contents } = teacup.normalizeArgs args
           if !_.isFunction(contents)
@@ -196,12 +191,10 @@ module.exports =
               _contents.push contents
             teacup.tag name, selector, attrs, "#{i}"
 
-    # f = (tagName, args...) ->
-    #   debugger;
-    #   {attrs, contents} = teacup.normalizeArgs args
-    #   @raw "<#{tagName}#{@renderAttrs attrs}>"
-    #   @renderContents contents
-    #   @raw "</#{tagName}>"
+    # f = teacup.component (selector, attrs, renderContents, args...) ->
+    #       @raw "<#{name}#{@renderAttrs attrs}>"
+    #       renderContents.apply(@, args)
+    #       @raw "</#{name}>"
 
     window[name.replace('-', '_')] = f
     window[_.camelize(name)] = f
