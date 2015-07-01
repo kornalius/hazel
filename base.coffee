@@ -119,6 +119,7 @@ BaseView = Class 'BaseView',
 
     root = @createShadowRoot()
 
+    @noTemplate = false
     @isReady = false
     @isAttached = false
     @_vdom = null
@@ -323,17 +324,17 @@ BaseView = Class 'BaseView',
       @_el_style = patch(@_el_style, patches);
     @_vdom_style = vs;
 
-    s = _getTemplate(@, @__proto__, content)
-    console.log s
-    if _.isEmpty(s)
-      s = '<div></div>'
-    v = fromHTML(s)
-    if !@_vdom?
-      @_el = create(v)
-    else
-      patches = diff(@_vdom, v);
-      @_el = patch(@_el, patches);
-    @_vdom = v;
+    if @noTemplate == false
+      s = _getTemplate(@, @__proto__, content)
+      if _.isEmpty(s)
+        s = '<div></div>'
+      v = fromHTML(s)
+      if !@_vdom?
+        @_el = create(v)
+      else
+        patches = diff(@_vdom, v);
+        @_el = patch(@_el, patches);
+      @_vdom = v;
 
     if @updated?
       @updated()
